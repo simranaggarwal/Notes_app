@@ -1,0 +1,21 @@
+
+<form method = "post" action = "" role = "form" enctype="multipart/form-data">
+	 {% csrf_token %}
+	 {{ form.as_p }}
+		<button type="Submit"> Submit</button>
+</form>
+
+{% if myVar %}
+	{% for var in myVar%}
+	<h1>{{ var.noteText }}</h1><br>
+	{% endfor %}
+{% endif %}
+
+ {% if myAnother %}
+	{% for var in myAnother%}
+	<h1>{{ var.noteText }}</h1><br>
+	{% endfor %}
+{% endif %}
+
+<a href = '{%  url 'UserSignUp:mynotes' %}'>Create Notes</a>
+<a href = '{% url 'UserSignUp:loggout' %}'>Log Out</a>

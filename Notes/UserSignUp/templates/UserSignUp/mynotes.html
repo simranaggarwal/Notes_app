@@ -1,0 +1,13 @@
+{# <a href='{%  url 'UserSignUp:mynotes' %}'>Hello</a> #}
+
+<br>
+<h2>{{ username }} </h2>
+{# jfklds #}
+
+
+<form method = "post" action = "" role = "form" enctype="multipart/form-data">
+	 {% csrf_token %}
+	 {{ form.as_p }}
+		<button type="Submit"> Submit</button>
+</form>
+<a href= '{%  url 'UserSignUp:search' %}'>Search Notes</a>
