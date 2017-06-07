@@ -31,7 +31,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'Testing',
     'UserSignUp',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -81,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'test_db',
         'USER': 'test_user',
-        'PASSWORD': 'abc',
+        'PASSWORD': '',
         'HOST': 'localhost',
         }
 }

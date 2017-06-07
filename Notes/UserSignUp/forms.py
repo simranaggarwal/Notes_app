@@ -12,8 +12,9 @@ class SignUpForm(forms.ModelForm):
 		fields = ['username', 'password', 'first_name']
 	
 class LogForm(forms.Form):
-	password = forms.CharField(widget = forms.PasswordInput())
 	username = forms.CharField(max_length = 20)
+	password = forms.CharField(widget = forms.PasswordInput())
+		
 	class Meta:
 		model = User
 		fields = ['username', 'password']	

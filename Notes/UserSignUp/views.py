@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.shortcuts import render,redirect
-from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render,redirect, reverse
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout as log_out
 from django.template import loader
 from django.views.generic import View
 from django.contrib import messages
-# Create your views here.
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-#from .models import user_info
 from .forms import SignUpForm, LogForm, MyNotes, TagSearch
-from .models import NotesDatabase
+from .models import NotesDatabase, Tags, Sharednames
 
 def signUp(request):
     return render(request, 'UserSignUp/SignUpPage.html', {})
@@ -37,7 +35,7 @@ class LoginForm(View):
  				request.session['username'] = username
 				messages.add_message(request, messages.INFO, username)
 
- 				return redirect("http://127.0.0.1:8000/myapp/mynotes")
+ 				return redirect(reverse('UserSignUp:mynotes'))
  		return render(request, self.template_name, {'form': form})
 
 
@@ -67,7 +65,7 @@ class  UserFormView(View):
  			
  			user = authenticate(username=username, password=password)
  			if user is not None:
- 				return redirect("http://127.0.0.1:8000/myapp/login/")
+ 				return redirect(reverse('UserSignUp:login'))
  		return render(request, self.template_name, {'form': form})
 
 class NotesCreate(View):
@@ -76,7 +74,8 @@ class NotesCreate(View):
 
 	def get(self, request):
 		form = self.form_class(None)
-		return render(request, self.template_name, {'form': form})
+		return render(request, self.template_name, {'form': form,
+													'username': request.user.username})
 
 	def post(self, request):
 		form = self.form_class(request.POST, None)
@@ -85,18 +84,29 @@ class NotesCreate(View):
 			if form.is_valid():
 				noteText = form.cleaned_data['noteText']
 				tags = form.cleaned_data['tags']
-				#username = form.cleaned_data['username']
 				username = request.session.get('username', False)
 				sharedwith = form.cleaned_data['sharedwith']
 				sharedunames = sharedwith.split(",")
-				mytags= tags.split(",")
-				print mytags
+				mytags = tags.split(",")
+				#print mytags
+
 				UserInstance=User.objects.get(username=username)
-				NotesDatabaseInstance = NotesDatabase.objects.create(username = UserInstance, noteText = noteText, tags = mytags, sharedwith= sharedunames)
-				return redirect("http://127.0.0.1:8000/myapp/search/")	
+				NotesDatabaseInstance = NotesDatabase.objects.create(username = UserInstance, noteText = noteText)
+				for tag in mytags:
+					created,t1 = Tags.objects.get_or_create(myTag = tag)
+					created.myNote.add(NotesDatabaseInstance)
+				for name in sharedunames:
+					try:
+						userExist=User.objects.get(username=name)
+						created,u1 = Sharednames.objects.get_or_create(shareduser = name)
+						created.mysharedname.add(NotesDatabaseInstance)
+					except Exception as e:
+						print "this user "+ name + "does not exist "
+				return redirect(reverse('UserSignUp:mynotes'))
 		else:
-			return redirect("http://127.0.0.1:8000/myapp/login/")
-		return render(request, self.template_name, {'form': form})
+			return redirect(reverse('UserSignUp:login'))
+		return render(request, self.template_name, {'form': form,
+													'username': request.user.username})
 
 
 class SearchTag(View):
@@ -114,21 +124,27 @@ class SearchTag(View):
 			if form.is_valid():
 				tag = form.cleaned_data['search']
 				username = request.session.get('username', False)
-				#print username
-				UserInstance=User.objects.get(username=username)
-				myVar = NotesDatabase.objects.filter(username = UserInstance).filter(tags__contains=[tag])
-				myAnother = NotesDatabase.objects.filter(sharedwith__contains= [username]).filter(tags__contains=[tag])
-				print myAnother
-				return render(request, 'UserSignUp/search.html', {'myVar':myVar, 'myAnother':myAnother})
+				print "username --> "+ username
+				UserInstance = User.objects.get(username=username)
+				myVar = Tags.objects.filter(myTag = tag)
+				NotesDatabaseInstance = NotesDatabase.objects.filter(tags = myVar, username = UserInstance)
+				
+				try:
+					SharedInstance=Sharednames.objects.get(shareduser=username)
+					NotesDatabaseInstance2=NotesDatabase.objects.filter(sharednames=SharedInstance,tags=myVar)
+					print NotesDatabaseInstance2
+					return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance,'shared':NotesDatabaseInstance2})
+				except:
+					print "in except ---->>>>>"
+				return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance})
 		else:
-			return redirect("http://127.0.0.1:8000/myapp/login/")
+			return redirect(reverse('UserSignUp:login'))
 		return render(request, self.template_name, {'form': form})
 
 
-def loggout(request):
-	#del request.session['username']
-	logout(request)
-	return redirect("http://127.0.0.1:8000/myapp/login/")
+def logout(request):
+	log_out(request)
+	return redirect(reverse('UserSignUp:login'))
 
 
 

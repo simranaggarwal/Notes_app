@@ -11,11 +11,11 @@
 	{% endfor %}
 {% endif %}
 
- {% if myAnother %}
-	{% for var in myAnother%}
-	<h1>{{ var.noteText }}</h1><br>
+<h1>Printing the shared notes</h1>
+	{% for var in shared%}
+		<h1>{{ var.noteText }}</h1><br>
 	{% endfor %}
-{% endif %}
+
 
 <a href = '{%  url 'UserSignUp:mynotes' %}'>Create Notes</a>
-<a href = '{% url 'UserSignUp:loggout' %}'>Log Out</a>
+<a href = '{% url 'UserSignUp:logout' %}'>Log Out</a>
