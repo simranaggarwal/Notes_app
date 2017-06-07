@@ -128,15 +128,16 @@ class SearchTag(View):
 				UserInstance = User.objects.get(username=username)
 				myVar = Tags.objects.filter(myTag = tag)
 				NotesDatabaseInstance = NotesDatabase.objects.filter(tags = myVar, username = UserInstance)
-				
+				AnotherInstance = NotesDatabase.objects.filter(noteText__search=tag, username = UserInstance)
+				print AnotherInstance
 				try:
 					SharedInstance=Sharednames.objects.get(shareduser=username)
-					NotesDatabaseInstance2=NotesDatabase.objects.filter(sharednames=SharedInstance,tags=myVar)
-					print NotesDatabaseInstance2
-					return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance,'shared':NotesDatabaseInstance2})
+					NotesDatabaseInstance2=NotesDatabase.objects.filter(sharednames=SharedInstance, tags = myVar)
+					OneMoreInstance = NotesDatabase.objects.filter(sharednames=SharedInstance, noteText__search=tag)
+					return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance,'shared':NotesDatabaseInstance2, 'Anot':AnotherInstance, 'Onemore':OneMoreInstance})
 				except:
 					print "in except ---->>>>>"
-				return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance})
+				return render(request, 'UserSignUp/search.html', {'myVar':NotesDatabaseInstance, 'Anot':AnotherInstance})
 		else:
 			return redirect(reverse('UserSignUp:login'))
 		return render(request, self.template_name, {'form': form})

@@ -11,8 +11,8 @@ class NotesDatabase(models.Model):
     noteText = models.CharField(max_length=1000)
 
     def __str__(self):
-		return self.username.username
-
+		return self.noteText
+		
 class Tags(models.Model):
 	myTag = models.CharField(max_length=15)
 	myNote = models.ManyToManyField(NotesDatabase)

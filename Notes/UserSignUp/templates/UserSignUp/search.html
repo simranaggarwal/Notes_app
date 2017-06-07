@@ -7,14 +7,28 @@
 
 {% if myVar %}
 	{% for var in myVar%}
-	<h1>{{ var.noteText }}</h1><br>
+	<h4>{{ var.noteText }}</h4><br>
 	{% endfor %}
 {% endif %}
-
-<h1>Printing the shared notes</h1>
+<br>
+<h3>Printing the shared notes</h3>
 	{% for var in shared%}
-		<h1>{{ var.noteText }}</h1><br>
+		<h4>{{ var.noteText }}</h4><br>
 	{% endfor %}
+<br>
+<br>
+<h3>Text Search</h3>
+{% if Anot %}
+	{% for var in Anot%}
+	<h4>{{ var.noteText }}</h4><br>
+	{% endfor %}
+{% endif %}
+<br>
+{% if Onemore %}
+	{% for var in Onemore%}
+	<h4>{{ var.noteText }}</h4><br>
+	{% endfor %}
+{% endif %}
 
 
 <a href = '{%  url 'UserSignUp:mynotes' %}'>Create Notes</a>
