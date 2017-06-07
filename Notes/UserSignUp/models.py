@@ -11,9 +11,14 @@ from django.contrib.auth.models import User
 class NotesDatabase(models.Model):
     username = models.ForeignKey(User)
     noteText = models.CharField(max_length=1000)
-    tags = ArrayField(models.CharField(max_length=200), blank=True)
-    sharedwith = ArrayField(models.CharField(max_length=200), blank=True, null= True)
-
+    sharedWith=models.ManyToManyField(User)
 
     def __str__(self):
-    	return self.noteText+"	"+self.username.username
+    	return self.noteText+"	user --->. "+self.username.username
+
+class Tags(models.Model):
+ 	myTag=models.CharField(max_length=100)
+ 	myNote=models.ManyToManyField(NotesDatabase)
+
+ 	def __str__(self):
+ 		return self.myTag

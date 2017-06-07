@@ -11,7 +11,10 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 #from .models import user_info
 from .forms import SignUpForm, LogForm, MyNotes, TagSearch
-from .models import NotesDatabase
+from .models import NotesDatabase,Tags
+from django.urls import reverse
+from django.core.urlresolvers import reverse
+
 
 def signUp(request):
     return render(request, 'UserSignUp/SignUpPage.html', {})
@@ -37,7 +40,7 @@ class LoginForm(View):
  				request.session['username'] = username
 				messages.add_message(request, messages.INFO, username)
 
- 				return redirect("http://127.0.0.1:8000/myapp/mynotes")
+ 				return redirect(reverse('UserSignUp:mynotes'))
  		return render(request, self.template_name, {'form': form})
 
 
@@ -67,7 +70,7 @@ class  UserFormView(View):
  			
  			user = authenticate(username=username, password=password)
  			if user is not None:
- 				return redirect("http://127.0.0.1:8000/myapp/login/")
+ 				return redirect(reverse('UserSignUp:login'))
  		return render(request, self.template_name, {'form': form})
 
 class NotesCreate(View):
@@ -90,12 +93,19 @@ class NotesCreate(View):
 				sharedwith = form.cleaned_data['sharedwith']
 				sharedunames = sharedwith.split(",")
 				mytags= tags.split(",")
-				print mytags
+				
 				UserInstance=User.objects.get(username=username)
 				NotesDatabaseInstance = NotesDatabase.objects.create(username = UserInstance, noteText = noteText, tags = mytags, sharedwith= sharedunames)
-				return redirect("http://127.0.0.1:8000/myapp/search/")	
+				
+				#adding the tags in the Tags table
+				for tag in mytags:
+					created,t1=Tags.objects.get_or_create(myTag=tag)
+					
+					created.myNote.add(NotesDatabaseInstance)
+
+				return redirect(reverse('UserSignUp:search'))	
 		else:
-			return redirect("http://127.0.0.1:8000/myapp/login/")
+			return redirect(reverse('UserSignUp:login'))
 		return render(request, self.template_name, {'form': form})
 
 
@@ -116,19 +126,20 @@ class SearchTag(View):
 				username = request.session.get('username', False)
 				#print username
 				UserInstance=User.objects.get(username=username)
-				myVar = NotesDatabase.objects.filter(username = UserInstance).filter(tags__contains=[tag])
-				myAnother = NotesDatabase.objects.filter(sharedwith__contains= [username]).filter(tags__contains=[tag])
+				t1=Tags.objects.get(myTag=tag)
+				myAnother=NotesDatabase.objects.filter(tags=t1,username=UserInstance)
+
 				print myAnother
-				return render(request, 'UserSignUp/search.html', {'myVar':myVar, 'myAnother':myAnother})
+				return render(request, 'UserSignUp/search.html', {'myAnother':myAnother})
 		else:
-			return redirect("http://127.0.0.1:8000/myapp/login/")
+			return redirect(reverse('UserSignUp:login'))
 		return render(request, self.template_name, {'form': form})
 
 
 def loggout(request):
 	#del request.session['username']
 	logout(request)
-	return redirect("http://127.0.0.1:8000/myapp/login/")
+	return redirect(reverse('UserSignUp:login'))
 
 
 
